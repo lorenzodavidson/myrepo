@@ -60,8 +60,17 @@ who_sum <- who1 %>%
   summarise(
     count = n())
 
-Afghanistan <- filter(by_country,country=="Afghanistan")
+# Afghanistan vs USA cases
+Afg_Usa <- filter(who1,country=="Afghanistan" | country == "United States of America")
+ggplot(Afg_Usa) + 
+  geom_bar(aes(year,cases,fill = country), stat = "identity", position = "dodge")
 
-ggplot(Afghanistan, aes(year)) + 
-  geom_bar(aes(fill = sex))
+by_country <- who1 %>%
+  group_by(country) %>%
+  summarise(
+    count = n())
+ggplot(by_country,aes(x=country,y=count)) + 
+  geom_bar(stat = "identity")
+
+
   
