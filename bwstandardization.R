@@ -36,4 +36,5 @@ map <- get_stamenmap(
 
 # Plotting telemetry data
 ggmap(map) +
-  geom_point(bwfw_standardized,mapping=aes(x=mean_lon,y=mean_lat,color=DeploymentID),show.legend = FALSE)
+  geom_point(bwfw_standardized,mapping=aes(x=mean_lon,y=mean_lat,color=DeploymentID),
+             show.legend = FALSE)
