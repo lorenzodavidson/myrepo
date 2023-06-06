@@ -64,6 +64,8 @@ who_sum <- who1 %>%
 Afg_Usa <- filter(who1,country=="Afghanistan" | country == "United States of America")
 ggplot(Afg_Usa) + 
   geom_bar(aes(year,cases,fill = country), stat = "identity", position = "dodge")
+ggplot(filter(Afg_Usa,country=="Afghanistan")) + 
+  geom_bar(aes(year,cases,fill = sex), stat = "identity")
 
 by_country <- who1 %>%
   group_by(country) %>%
@@ -71,6 +73,3 @@ by_country <- who1 %>%
     count = n())
 ggplot(by_country,aes(x=country,y=count)) + 
   geom_bar(stat = "identity")
-
-
-  
