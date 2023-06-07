@@ -33,8 +33,16 @@ map <- get_stamenmap(
   bbox = c(left=-135,bottom=0,right=-75,top=50),
   maptype = "terrain",
   zoom=4)
+map <- ggmap(map, legend = "topright")
 
 # Plotting telemetry data
-ggmap(map) +
+map +
   geom_point(bwfw_standardized,mapping=aes(x=mean_lon,y=mean_lat,color=DeploymentID),
              show.legend = FALSE)
+
+map +
+  stat_density2d(bwfw_standardized,
+                 mapping=aes(x = mean_lon, y = mean_lat),
+                 linewidth = 2, bins = 100, alpha = 0.3, na.rm = TRUE,
+                 geom = "polygon"
+  )
