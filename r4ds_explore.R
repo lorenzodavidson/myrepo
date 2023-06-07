@@ -5,7 +5,8 @@ library(nycflights13)
 not_cancelled <- flights %>% 
   filter(!is.na(dep_delay), !is.na(arr_delay))
 
-## Chapter 5
+
+# Chapter 5 ---------------------------------------------------------------
 
 # Plotting delays
 delays <- not_cancelled %>% 
@@ -17,7 +18,8 @@ delays <- not_cancelled %>%
 ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
   geom_point(alpha = 1/10)
 
-## Chapter 7
+
+# Chapter 7 ---------------------------------------------------------------
 
 # Visualizing outliers
 ggplot(diamonds) + 

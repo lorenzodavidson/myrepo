@@ -2,7 +2,7 @@ library(ggplot2)
 library(tidyverse)
 library(nycflights13)
 
-## RELATIONAL DATA
+# Relational Data ---------------------------------------------------------
 
 # Joining
 x <- tribble(
