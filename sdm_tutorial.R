@@ -1,8 +1,3 @@
-library(raster)
-library(rgdal)
-library(dismo)
-
-
 #Load libraries 
 suppressPackageStartupMessages(suppressWarnings({
   #library(devtools)
@@ -14,7 +9,7 @@ suppressPackageStartupMessages(suppressWarnings({
   library(adehabitatLT) # help(package='adehabitat') # help.search('angle',package='adehabitat')
   library(maps)       # for map.where
   library(mapdata)    # for worldHires
-  library(sp)
+  library(sf)
   library(maptools)
   library(mgcv)
   library(ape)
@@ -25,24 +20,10 @@ suppressPackageStartupMessages(suppressWarnings({
   library(gbm)
   library(tidyverse)
   library(viridis)
-  library(rJava)
+  #library(rJava)
   #library(ggmap)
   #library(RgoogleMaps)
 }))
-
-install.packages("adehabitatLT")
-install.packages("maps")
-install.packages("mapdata")
-install.packages("maptools")
-install.packages("mgcv")
-install.packages("ape")
-install.packages("ncf")
-install.packages("ncdf4")
-install.packages("spdep")
-install.packages("ROCR")
-install.packages("gbm")
-install.packages("tidyverse")
-install.packages("viridis")
 
 
 # Data Preparation --------------------------------------------------------
@@ -58,7 +39,7 @@ bwfw <- bwfw %>%
 
 # Land removal (from Hazen tutorial) --------------------------------------
 
-# Function
+# Function + Remove
 removeland<-function(dataset,sp.obj){
   pt = SpatialPoints(matrix(c(dataset$lon,dataset$lat), nrow=length(dataset$lon)), proj4string=CRS("+proj=longlat +datum=WGS84"))
   place = over(pt, sp.obj)
@@ -70,23 +51,24 @@ map_background = maps::map('worldHires', fill=T, col='transparent')
 back.IDs = sapply(strsplit(map_background$names, ":"), function(x) x[1])
 back.sp = map2SpatialPolygons(map_background, IDs=back.IDs, proj4string=CRS("+proj=longlat +datum=WGS84"))
 
+# Clean data
 bwfw_clean<-removeland(bwfw,back.sp)
-coordinates(whales_clean) = ~long+lat
-#plotting points -- we're still seeing some errors with points that have incorrect longitudes
-points(whales_clean, pch=16, col=rgb(1, 0, 0, alpha=0.5), cex=0.3)
-bwfw_clean<-removeland(bwfw,back.sp)
+# bwfw_filtered <- bwfw_clean %>%
+  # filter(0 < lat | lat < 60 | -140 < lon | lon < -75)
 
+# Plot
 library(maptools)
 data(wrld_simpl)
-plot(wrld_simpl, xlim=c(-120,-80), ylim=c(0,50), axes=TRUE, col="light yellow")
-points(bwfw$lon, bwfw$lat, col='red', pch=20, cex=0.5)
+plot(wrld_simpl, xlim=c(-120,-80), ylim=c(0,60), axes=TRUE, col="light yellow")
+coordinates(bwfw_clean) = ~lon+lat
+points(bwfw_clean, pch=16, col=rgb(1, 0, 0, alpha=0.5), cex=0.3)
 
+# Sampling Bias -----------------------------------------------------------
 library(sp)
 coordinates(bwfw) <- ~lon+lat
 crs(bwfw) <- crs(wrld_simpl)
 class(bwfw)
 
-# Sampling Bias
 r <- raster(bwfw) # create a RasterLayer with the extent of acgeo
 res(r) <- 1 # set the resolution of the cells to (for example) 1 degree
 r <- extend(r, extent(r)+1)
@@ -95,4 +77,23 @@ p <- rasterToPolygons(r)
 plot(p, border='gray')
 points(bwfw)
 points(bwfw_sel, cex=1, col='red', pch='x') # selected points in red
+
+# Background/Absence Data -------------------------------------------------
+
+# Unable to mask out land
+files <- list.files(path=paste(system.file(package="dismo"), '/ex',
+                               sep=''),  pattern='grd',  full.names=TRUE )
+land_mask <- raster(files[1])
+# set.seed(1963) # select 500 random points with same seed
+bg <- randomPoints(!mask, 500)
+
+par(mfrow=c(1,2))
+plot(!is.na(mask), legend=FALSE)
+points(bg, cex=0.5)
+
+e <- extent(-140, -75, 0, 60)
+bg2 <- randomPoints(mask, 50, ext=e)
+plot(!is.na(mask), legend=FALSE)
+plot(e, add=TRUE, col='black')
+points(bg2, cex=0.5)
 
